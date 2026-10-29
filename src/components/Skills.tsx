@@ -9,7 +9,7 @@ const ease = [0.16, 1, 0.3, 1] as const;
 // Skill groups whose tags float up one after another when the group scrolls into view.
 export default function Skills({ groups }: { groups: SkillGroup[] }) {
   return (
-    <section id="skills" className="mx-auto w-full max-w-6xl px-4 py-32 sm:px-8">
+    <section id="skills" className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-8 md:py-26">
       <SectionHeading label="Skills" title="The toolkit." />
 
       <div className="mt-16 grid gap-x-16 gap-y-14 md:grid-cols-2">

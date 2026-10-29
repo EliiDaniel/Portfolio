@@ -24,7 +24,7 @@ export default function Education({ education, certifications, languages }: Educ
   });
 
   return (
-    <section id="education" className="mx-auto w-full max-w-6xl px-4 py-32 sm:px-8">
+    <section id="education" className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-8 md:pt-13 md:pb-26">
       <SectionHeading label="Education" title="Always learning." />
 
       <div className="mt-16 grid gap-6 md:grid-cols-2">

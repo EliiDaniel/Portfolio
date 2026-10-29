@@ -126,7 +126,7 @@ export default function Projects({ projects }: { projects: Project[] }) {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section id="projects" className="mx-auto w-full max-w-6xl px-4 py-32 sm:px-8">
+    <section id="projects" className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-8 md:pt-26 md:pb-0">
       <SectionHeading label="Projects" title="Things I've made." />
 
       {reduceMotion ? (

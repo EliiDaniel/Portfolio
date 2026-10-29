@@ -28,8 +28,8 @@ function Counter({ value }: { value: number }) {
 // Row of big headline numbers.
 export default function Stats({ stats }: { stats: Stat[] }) {
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-24 sm:px-8">
-      <dl className="grid grid-cols-2 gap-y-14 gap-x-8 border-y border-white/10 py-16 md:grid-cols-4">
+    <section className="mx-auto w-full max-w-6xl px-4 py-18 sm:px-8 md:py-20">
+      <dl className="grid grid-cols-2 gap-y-12 gap-x-8 border-y border-white/10 py-14 md:grid-cols-4">
         {stats.map((stat) => (
           // Label comes first for screen readers; flex-col-reverse shows the number on top.
           <div key={stat.label} className="flex flex-col-reverse text-center">

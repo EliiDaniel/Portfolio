@@ -12,7 +12,7 @@ export default function Experience({ jobs }: { jobs: Job[] }) {
   const { scrollYProgress } = useScroll({ target: timelineRef, offset: ["start 75%", "end 60%"] });
 
   return (
-    <section id="experience" className="mx-auto w-full max-w-5xl px-4 py-32 sm:px-8">
+    <section id="experience" className="mx-auto w-full max-w-5xl px-4 py-24 sm:px-8 md:py-26">
       <SectionHeading label="Experience" title="Where I've built." />
 
       <div ref={timelineRef} className="relative mt-16">

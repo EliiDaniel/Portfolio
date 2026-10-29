@@ -11,7 +11,7 @@ const secondaryButton =
 // Closing call to action with contact links, the resume download, and the site footer.
 export default function Contact({ name, contact }: ContactProps) {
   return (
-    <section id="contact" className="mx-auto w-full max-w-6xl px-4 pt-32 pb-12 sm:px-8">
+    <section id="contact" className="mx-auto w-full max-w-6xl px-4 pt-24 pb-12 sm:px-8 md:pt-26">
       <SectionHeading label="Contact" title="Let's build something." />
 
       <p className="mt-6 max-w-2xl text-balance text-lg text-foreground/80 sm:text-xl">
@@ -37,7 +37,7 @@ export default function Contact({ name, contact }: ContactProps) {
         </a>
       </div>
 
-      <footer className="mt-32 border-t border-white/10 pt-8 text-sm text-muted">© 2026 {name}</footer>
+      <footer className="mt-26 border-t border-white/10 pt-8 text-sm text-muted">© 2026 {name}</footer>
     </section>
   );
 }
