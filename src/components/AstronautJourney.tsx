@@ -129,7 +129,8 @@ export default function AstronautJourney() {
 
   // Scene 4: rocket enters from off-screen left at full size, then flies away into the distance:
   // it climbs, shrinks to a speck and fades out, with a gentle wobble along the way.
-  const rocketX = useTransform(ride, (r) => `${mix(-40, 72, r)}vw`);
+  // Ends near the right edge of the screen (the shrunken rocket sits at the centre of its box).
+  const rocketX = useTransform(ride, (r) => `${mix(-40, 86, r)}vw`);
   const rocketY = useTransform(ride, (r) => `${mix(6, -22, r) + Math.sin(r * Math.PI * 3) * 3}vh`);
   // Eased so it stays close for a while and only shrinks quickly near the end.
   const rocketScale = useTransform(ride, (r) => mix(1.15, 0.18, r ** 1.8));
