@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Unbounded } from "next/font/google";
 import "lenis/dist/lenis.css";
 import "./globals.css";
+import AstronautJourney from "@/components/AstronautJourney";
 import NavBar from "@/components/NavBar";
 import ParticlesBackground from "@/components/ParticlesBackground";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col font-sans">
         <ParticlesBackground className="fixed inset-0 -z-10" />
         <SmoothScroll>
+          <AstronautJourney />
           <NavBar name={resume.name} />
           {children}
         </SmoothScroll>

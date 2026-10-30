@@ -23,7 +23,8 @@ export default function Hero({ name, title, location }: HeroProps) {
 
   return (
     <section id="top" ref={ref} className={reduceMotion ? "relative h-screen" : "relative h-[200vh]"}>
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-4">
+      {/* Bottom padding leaves room for the astronaut at its laptop (AstronautJourney) under the name */}
+      <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-4 pb-[min(46vh,400px)]">
         {/* Placeholder graphic: soft glowing shapes behind the name */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-1/2 h-[60vmin] w-[60vmin] -translate-x-[70%] -translate-y-1/2 rounded-full bg-accent/25 blur-[120px]" />
@@ -55,7 +56,7 @@ export default function Hero({ name, title, location }: HeroProps) {
         {!reduceMotion && (
           <motion.p
             style={{ opacity: hintOpacity }}
-            className="absolute bottom-10 text-sm tracking-widest text-muted uppercase"
+            className="absolute bottom-3 text-xs tracking-widest text-muted uppercase"
           >
             Scroll
           </motion.p>

@@ -36,7 +36,7 @@ export type Language = {
 export const resume = {
   name: "Eli Daniel Israel Monteroso",
   title: "Software Engineer",
-  location: "Baybay City, Leyte, Philippines",
+  location: "Cebu City, Cebu, Philippines",
   // Put the photo in public/images and set this to its path, e.g. "/images/eli.jpg". Empty shows a placeholder.
   photo: "",
 
