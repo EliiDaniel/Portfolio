@@ -53,24 +53,28 @@ function Defs() {
   );
 }
 
-// `overlay` is drawn on top without the sticker border, for soft effects like steam.
+// `underlay` and `overlay` are drawn behind and on top without the sticker border,
+// for see-through or soft effects like the planet's ring and the coffee steam.
 // `thin` uses a narrower border, for art that is shown very large (like the big planet).
 function Sticker({
   viewBox,
   className,
   children,
+  underlay,
   overlay,
   thin = false,
 }: {
   viewBox: string;
   className?: string;
   children: React.ReactNode;
+  underlay?: React.ReactNode;
   overlay?: React.ReactNode;
   thin?: boolean;
 }) {
   return (
     <svg viewBox={viewBox} className={className} overflow="visible" aria-hidden>
       <Defs />
+      {underlay}
       <g filter={thin ? "url(#astro-sticker-thin)" : "url(#astro-sticker)"}>{children}</g>
       {overlay}
     </svg>
@@ -292,34 +296,52 @@ export const planetCrestAbove = (visibleBottomY - (planet.cy - planet.r)) / 260;
 
 const planetLines = { stroke: navy, strokeWidth: 2.4, strokeLinejoin: "round" as const };
 
-// Ring bands from outermost to innermost: radii, thickness and colour.
-const ringBands: { rx: number; ry: number; width: number; color: string }[] = [
-  { rx: 186, ry: 40, width: 14, color: "#fbe7ff" },
-  { rx: 164, ry: 35, width: 9, color: "#f0abfc" },
-  { rx: 146, ry: 31, width: 7, color: "#e9d5ff" },
+// Saturn-like ring: one broad, flat, semi-transparent disc built from many soft bands,
+// with a dark gap partway out and fine lines between bands. Bands are listed inner to outer.
+const ringFlatness = 0.185;
+const ringBands: { rx: number; width: number; color: string; opacity: number }[] = [
+  { rx: 150, width: 8, color: "#e9d5ff", opacity: 0.2 },
+  { rx: 162, width: 14, color: "#f0abfc", opacity: 0.32 },
+  { rx: 177, width: 14, color: "#fbe7ff", opacity: 0.55 },
+  // Gap around rx 190 is left empty, like Saturn's dark division.
+  { rx: 204, width: 16, color: "#e9d5ff", opacity: 0.45 },
+  { rx: 220, width: 8, color: "#c4b5fd", opacity: 0.35 },
 ];
+const ringLines = [156, 170, 212];
+// Crisp edges: the inner rim, both sides of the gap, and the outer rim.
+const ringEdges = [146, 184.5, 196, 225];
+const ringOuterEdge = 228;
 
 function RingHalf({ front }: { front: boolean }) {
   // Upper arcs pass behind the planet, lower arcs in front of it.
   const sweep = front ? 0 : 1;
+  const arc = (rx: number) =>
+    `M${planet.cx - rx} ${planet.cy} A${rx} ${rx * ringFlatness} 0 0 ${sweep} ${planet.cx + rx} ${planet.cy}`;
   return (
-    <g transform={`rotate(-14 ${planet.cx} ${planet.cy})`} fill="none">
-      {ringBands.map(({ rx, ry, width, color }) => {
-        const arc = `M${planet.cx - rx} ${planet.cy} A${rx} ${ry} 0 0 ${sweep} ${planet.cx + rx} ${planet.cy}`;
-        return (
-          <g key={rx}>
-            <path d={arc} stroke={navy} strokeWidth={width + 3} />
-            <path d={arc} stroke={color} strokeWidth={width} />
-          </g>
-        );
-      })}
+    <g transform={`rotate(-16 ${planet.cx} ${planet.cy})`} fill="none">
+      {ringBands.map(({ rx, width, color, opacity }) => (
+        <path key={rx} d={arc(rx)} stroke={color} strokeOpacity={opacity} strokeWidth={width} />
+      ))}
+      {ringLines.map((rx) => (
+        <path key={rx} d={arc(rx)} stroke="white" strokeOpacity={0.3} strokeWidth={1} />
+      ))}
+      {ringEdges.map((rx) => (
+        <path key={rx} d={arc(rx)} stroke="#f5f0ff" strokeOpacity={0.85} strokeWidth={1.4} />
+      ))}
+      <path d={arc(ringOuterEdge)} stroke={navy} strokeWidth={2.2} />
     </g>
   );
 }
 
 export function Planet({ className }: { className?: string }) {
   return (
-    <Sticker viewBox={planetViewBox} className={className} thin>
+    <Sticker
+      viewBox={planetViewBox}
+      className={className}
+      thin
+      underlay={<RingHalf front={false} />}
+      overlay={<RingHalf front />}
+    >
       <defs>
         <clipPath id="astro-planet-clip">
           <circle {...planet} />
@@ -331,8 +353,6 @@ export function Planet({ className }: { className?: string }) {
           <stop offset="100%" stopColor="#e879f9" />
         </linearGradient>
       </defs>
-
-      <RingHalf front={false} />
 
       <circle {...planet} fill="url(#astro-planet-dusk)" {...planetLines} />
       <g clipPath="url(#astro-planet-clip)">
@@ -348,8 +368,6 @@ export function Planet({ className }: { className?: string }) {
         <path d="M140 92 Q160 72 196 68" fill="none" stroke="white" strokeOpacity={0.7} strokeWidth={6} strokeLinecap="round" />
       </g>
       <circle {...planet} fill="none" {...planetLines} />
-
-      <RingHalf front />
     </Sticker>
   );
 }
@@ -602,7 +620,10 @@ export function Peeker({ className }: { className?: string }) {
   return (
     <Sticker viewBox={peekerViewBox} className={className}>
       <Helmet cx={115} cy={112} r={70} />
-      <WavingMitten />
+      {/* Shifted left so the hand sits snug against the ear cup */}
+      <g transform="translate(-32 20)">
+        <WavingMitten />
+      </g>
     </Sticker>
   );
 }

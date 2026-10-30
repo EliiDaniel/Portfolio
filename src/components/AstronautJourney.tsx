@@ -20,7 +20,7 @@ import {
 // The planet hangs partly below the screen; the astronaut sits on its top, so both positions follow its width.
 const planetWidth = "min(92vw, 600px)";
 const planetBottom = `calc(-1 * ${planetWidth} * ${planetAspect * planetHiddenBelow})`;
-const astronautBottom = `calc(${planetWidth} * ${planetAspect * planetCrestAbove} - 1vh)`;
+const astronautBottom = `calc(${planetWidth} * ${planetAspect * planetCrestAbove} - 3.5vh)`;
 
 // Scroll positions (in pixels) where each scene starts and ends, measured from the page.
 type Marks = {
