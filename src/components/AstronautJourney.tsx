@@ -30,7 +30,6 @@ type Marks = {
   aboutTop: number;
   aboutEnd: number;
   experienceTop: number;
-  skillsTop: number;
   projectsTop: number;
   projectsEnd: number;
   contactTop: number;
@@ -44,7 +43,6 @@ const initialMarks: Marks = {
   aboutTop: 1600,
   aboutEnd: 3200,
   experienceTop: 1e9,
-  skillsTop: 1e9 + 1,
   projectsTop: 1e9,
   projectsEnd: 1e9 + 1,
   contactTop: 1e9,
@@ -58,8 +56,8 @@ const mix = (from: number, to: number, t: number) => from + (to - from) * t;
 // 1. Hero: sits on a ringed planet typing on a laptop.
 // 2. Hero to About: gets pulled off the planet and zooms out; planet and laptop fall away.
 // 3. About: drifts off into space, arms swaying, and fades.
-// 4. Experience to Skills: rides a rocket in from the left and out to the right.
-// 5. Projects: floats at the side, meditating with a coffee, wrapped in a glowing aura.
+// 4. Experience and Skills: rides a rocket in from the left, then flies away into the distance, shrinking.
+// 5. Projects: floats at the side, meditating with a coffee, with drifting light streaks.
 // 6. Contact: the helmet peeks up from the bottom edge and a hand waves goodbye.
 export default function AstronautJourney() {
   const reduceMotion = useReducedMotion();
@@ -75,10 +73,9 @@ export default function AstronautJourney() {
       const hero = document.getElementById("top");
       const about = document.getElementById("about");
       const experienceTop = top("experience");
-      const skillsTop = top("skills");
       const projects = document.getElementById("projects");
       const contactTop = top("contact");
-      if (!hero || !about || !projects || experienceTop === null || skillsTop === null || contactTop === null) return;
+      if (!hero || !about || !projects || experienceTop === null || contactTop === null) return;
       const projectsTop = projects.getBoundingClientRect().top + window.scrollY;
       const viewport = window.innerHeight;
       const aboutTop = about.getBoundingClientRect().top + window.scrollY;
@@ -89,7 +86,6 @@ export default function AstronautJourney() {
         aboutTop,
         aboutEnd: aboutTop + about.offsetHeight - viewport,
         experienceTop,
-        skillsTop,
         projectsTop,
         projectsEnd: projectsTop + projects.offsetHeight - viewport,
         contactTop,
@@ -106,7 +102,8 @@ export default function AstronautJourney() {
   const drift = useTransform(scrollY, (y) => between(y, marks.current.aboutTop, marks.current.aboutEnd));
   const ride = useTransform(scrollY, (y) => {
     const m = marks.current;
-    return between(y, m.experienceTop - m.viewport * 0.6, m.skillsTop);
+    // Flies through Experience and Skills, finishing just before the Projects scene appears.
+    return between(y, m.experienceTop - m.viewport * 0.6, m.projectsTop - m.viewport * 0.6);
   });
   const wave = useTransform(scrollY, (y) => {
     const m = marks.current;
@@ -130,11 +127,14 @@ export default function AstronautJourney() {
   const laptopOpacity = useTransform(pullAway, (p) => 1 - clamp01(p / 0.5));
   const sparklesOpacity = useTransform(pullAway, (p) => 1 - clamp01(p / 0.4));
 
-  // Scene 4: rocket crosses from off-screen left to off-screen right, rising and dipping gently.
-  const rocketX = useTransform(ride, (r) => `${mix(-50, 105, r)}vw`);
-  const rocketY = useTransform(ride, (r) => `${Math.sin(r * Math.PI * 3) * 4}vh`);
-  const rocketRotate = useTransform(ride, (r) => Math.sin(r * Math.PI * 3) * -6);
-  const rocketOpacity = useTransform(ride, (r) => (r > 0 && r < 1 ? 1 : 0));
+  // Scene 4: rocket enters from off-screen left at full size, then flies away into the distance:
+  // it climbs, shrinks to a speck and fades out, with a gentle wobble along the way.
+  const rocketX = useTransform(ride, (r) => `${mix(-40, 72, r)}vw`);
+  const rocketY = useTransform(ride, (r) => `${mix(6, -22, r) + Math.sin(r * Math.PI * 3) * 3}vh`);
+  // Eased so it stays close for a while and only shrinks quickly near the end.
+  const rocketScale = useTransform(ride, (r) => mix(1.15, 0.18, r ** 1.8));
+  const rocketRotate = useTransform(ride, (r) => mix(0, -10, r) + Math.sin(r * Math.PI * 3) * -5);
+  const rocketOpacity = useTransform(ride, (r) => (r > 0 ? 1 - clamp01((r - 0.75) / 0.25) : 0));
 
   // Scene 5: fades and floats in as Projects arrives, then fades out as Projects ends.
   const meditate = useTransform(scrollY, (y) => {
@@ -160,10 +160,10 @@ export default function AstronautJourney() {
   // The astronaut sits just inside the planet's crest.
   const heroScene = `pointer-events-none fixed left-1/2 -z-[5] aspect-[240/200] w-[min(46vw,250px)] -translate-x-1/2 ${glow}`;
   const planetScene = `pointer-events-none fixed left-1/2 -z-[5] aspect-[400/260] w-[min(92vw,600px)] -translate-x-1/2 ${glow}`;
-  // Deliberately huge: the final peek should feel big and playful.
   // Left side, below the project list; laptops only, since phones stack the cards across the full width.
   const meditatorScene = `pointer-events-none fixed bottom-[6vh] left-[3vw] -z-[5] hidden aspect-square w-[min(28vw,240px)] md:block ${glow}`;
-  const peekerScene =`pointer-events-none fixed right-[3vw] bottom-0 -z-[5] aspect-[240/200] w-[min(78vw,500px)] ${glow}`;
+  // Deliberately huge: the final peek should feel big and playful.
+  const peekerScene = `pointer-events-none fixed right-[3vw] bottom-0 -z-[5] aspect-[240/200] w-[min(78vw,500px)] ${glow}`;
 
   if (reduceMotion) {
     return (
@@ -221,7 +221,7 @@ export default function AstronautJourney() {
       </div>
 
       <motion.div
-        style={{ x: rocketX, y: rocketY, rotate: rocketRotate, opacity: rocketOpacity }}
+        style={{ x: rocketX, y: rocketY, scale: rocketScale, rotate: rocketRotate, opacity: rocketOpacity }}
         className={`pointer-events-none fixed top-[38vh] left-0 -z-[5] aspect-[280/220] w-[min(45vw,300px)] ${glow}`}
       >
         <motion.div {...bob} className={layer}>

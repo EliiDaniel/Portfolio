@@ -33,26 +33,30 @@ export default function Experience({ jobs }: { jobs: Job[] }) {
               transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
               className="relative"
             >
+              {/* Timeline dot, lined up with the date inside the card */}
               <span
                 aria-hidden
-                className="absolute -left-11 top-0 h-5 w-5 rounded-full border-[3px] border-accent bg-background shadow-[0_0_18px_rgba(41,151,255,0.7)] sm:-left-14"
+                className="absolute -left-11 top-6 h-5 w-5 rounded-full border-[3px] border-accent bg-background shadow-[0_0_18px_rgba(41,151,255,0.7)] sm:-left-14 sm:top-8"
               />
 
-              <p className="text-sm text-muted">{job.period}</p>
-              <h3 className="mt-2 font-display text-xl font-semibold tracking-tight sm:text-2xl">{job.title}</h3>
-              <p className="mt-1 text-lg text-accent">
-                {job.company}
-                {job.location && <span className="text-muted"> · {job.location}</span>}
-              </p>
+              {/* Frosted-glass card: anything passing behind (like the rocket) shows through blurred */}
+              <div className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
+                <p className="text-sm text-muted">{job.period}</p>
+                <h3 className="mt-2 font-display text-xl font-semibold tracking-tight sm:text-2xl">{job.title}</h3>
+                <p className="mt-1 text-lg text-accent">
+                  {job.company}
+                  {job.location && <span className="text-muted"> · {job.location}</span>}
+                </p>
 
-              <ul className="mt-5 space-y-3 text-base leading-relaxed text-foreground/80 sm:text-lg">
-                {job.highlights.map((highlight) => (
-                  <li key={highlight} className="flex gap-3">
-                    <span aria-hidden className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-muted" />
-                    {highlight}
-                  </li>
-                ))}
-              </ul>
+                <ul className="mt-5 space-y-3 text-base leading-relaxed text-foreground/80 sm:text-lg">
+                  {job.highlights.map((highlight) => (
+                    <li key={highlight} className="flex gap-3">
+                      <span aria-hidden className="mt-[0.7em] h-1 w-1 shrink-0 rounded-full bg-muted" />
+                      {highlight}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </motion.li>
           ))}
         </ol>
