@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { MotionConfig, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { useLiteMode } from "@/lib/performance";
 import {
   Aura,
@@ -72,7 +72,7 @@ const glowDisc = (
 // 6. Contact: the helmet peeks up from the bottom edge and a hand waves goodbye.
 export default function AstronautJourney() {
   const reduceMotion = useReducedMotion();
-  // Lite mode keeps the scroll story but drops the small looping details (twinkles, steam, streaks, bobbing).
+  // Lower-powered devices skip the astronaut entirely; it's the most expensive part of the page.
   const lite = useLiteMode();
   const { scrollY } = useScroll();
   const marks = useRef<Marks>(initialMarks);
@@ -187,6 +187,8 @@ export default function AstronautJourney() {
   // Deliberately huge: the final peek should feel big and playful.
   const peekerScene = "pointer-events-none fixed right-[3vw] bottom-0 -z-[5] aspect-[240/200] w-[min(78vw,500px)]";
 
+  if (lite) return null;
+
   if (reduceMotion) {
     return (
       <>
@@ -221,9 +223,7 @@ export default function AstronautJourney() {
   }
 
   return (
-    // In lite mode, "always" turns off the looping body animations (typing, waving, bobbing, tumbling),
-    // while the scroll-driven story keeps working.
-    <MotionConfig reducedMotion={lite ? "always" : "user"}>
+    <>
       <motion.div
         style={{ bottom: planetBottom, y: planetY, opacity: planetOpacity, visibility: planetVisibility }}
         className={planetScene}
@@ -234,11 +234,9 @@ export default function AstronautJourney() {
 
       <motion.div style={{ bottom: astronautBottom, visibility: heroVisibility }} className={heroScene}>
         {glowDisc}
-        {!lite && (
-          <motion.div style={{ opacity: sparklesOpacity }} className={layer}>
-            <Sparkles className={layer} />
-          </motion.div>
-        )}
+        <motion.div style={{ opacity: sparklesOpacity }} className={layer}>
+          <Sparkles className={layer} />
+        </motion.div>
 
         <motion.div
           style={{ x: astronautX, y: astronautY, scale: astronautScale, rotate: astronautRotate, opacity: astronautOpacity }}
@@ -285,13 +283,13 @@ export default function AstronautJourney() {
         className={meditatorScene}
       >
         {glowDisc}
-        {!lite && <Aura className={layer} />}
+        <Aura className={layer} />
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
           className={layer}
         >
-          <Meditator className={layer} steam={!lite} />
+          <Meditator className={layer} />
         </motion.div>
       </motion.div>
 
@@ -299,6 +297,6 @@ export default function AstronautJourney() {
         {glowDisc}
         <Peeker className={layer} />
       </motion.div>
-    </MotionConfig>
+    </>
   );
 }

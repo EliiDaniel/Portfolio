@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Unbounded } from "next/font/google";
 import "lenis/dist/lenis.css";
 import "./globals.css";
 import AstronautJourney from "@/components/AstronautJourney";
-import LiteModeFlag from "@/components/LiteModeFlag";
 import NavBar from "@/components/NavBar";
 import ParticlesBackground from "@/components/ParticlesBackground";
 import SmoothScroll from "@/components/SmoothScroll";
@@ -37,7 +36,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} ${unbounded.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
-        <LiteModeFlag />
         <ParticlesBackground className="fixed inset-0 -z-10" />
         <SmoothScroll>
           <AstronautJourney />

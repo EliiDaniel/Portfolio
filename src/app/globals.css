@@ -28,12 +28,6 @@ body {
   color: var(--foreground);
 }
 
-/* Lite mode (lower-powered devices): glass panels keep their light tint but skip the costly background blur. */
-html.lite * {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
 /* White "sticker" border for the astronaut art: a copy of the artwork drawn behind it with every shape
    turned white and given a thick outline. Much cheaper than an SVG filter, which redraws on every frame. */
 .astro-halo * {

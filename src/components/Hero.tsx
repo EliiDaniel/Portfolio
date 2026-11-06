@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useLiteMode } from "@/lib/performance";
 
 // Soft dark halo that follows each letter's outline, keeping text readable where the astronaut passes behind it.
 const halo = "[text-shadow:0_0_12px_rgba(5,5,5,0.9),0_0_28px_rgba(5,5,5,0.7)]";
@@ -16,6 +17,8 @@ type HeroProps = {
 export default function Hero({ name, title, location }: HeroProps) {
   const ref = useRef<HTMLElement>(null);
   const reduceMotion = useReducedMotion();
+  // Lower-powered devices don't show the astronaut, so no room needs to be kept for it under the name.
+  const lite = useLiteMode();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
 
   const nameScale = useTransform(scrollYProgress, [0, 0.6], [1, 0.6]);
@@ -27,7 +30,11 @@ export default function Hero({ name, title, location }: HeroProps) {
   return (
     <section id="top" ref={ref} className={reduceMotion ? "relative h-screen" : "relative h-[200vh]"}>
       {/* Bottom padding leaves room for the astronaut at its laptop (AstronautJourney) under the name */}
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-4 pb-[min(46vh,400px)] md:pb-0">
+      <div
+        className={`sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-4 ${
+          lite ? "" : "pb-[min(46vh,400px)] md:pb-0"
+        }`}
+      >
         {/* Soft glowing shapes behind the name. Radial gradients look like big blurs but cost almost nothing to draw. */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <div className="absolute left-1/2 top-1/2 h-[110vmin] w-[110vmin] -translate-x-[60%] -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(41,151,255,0.22),transparent)]" />

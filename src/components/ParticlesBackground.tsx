@@ -4,7 +4,7 @@ import type { Engine, ISourceOptions } from "@tsparticles/engine";
 import { Particles, ParticlesProvider } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import { useReducedMotion } from "motion/react";
-import { useIsSmallScreen, useLiteMode } from "@/lib/performance";
+import { useLiteMode } from "@/lib/performance";
 
 // tsParticles requires this setup function to stay the same for the whole app, so it lives outside the component.
 async function loadEngine(engine: Engine) {
@@ -42,10 +42,8 @@ const liteOptions = constellation({ dots: 22, fps: 30, mouse: false });
 export default function ParticlesBackground({ className }: { className?: string }) {
   const reduceMotion = useReducedMotion();
   const lite = useLiteMode();
-  const smallScreen = useIsSmallScreen();
 
-  // No dots at all for reduced motion, or on lower-powered phones.
-  if (reduceMotion || (lite && smallScreen)) return null;
+  if (reduceMotion) return null;
 
   return (
     <ParticlesProvider init={loadEngine}>
