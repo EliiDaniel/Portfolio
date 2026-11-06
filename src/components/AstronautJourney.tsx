@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { MotionConfig, motion, useReducedMotion, useScroll, useTransform } from "motion/react";
+import { useLiteMode } from "@/lib/performance";
 import {
   Aura,
   Coder,
@@ -51,6 +52,16 @@ const initialMarks: Marks = {
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 const between = (y: number, start: number, end: number) => clamp01((y - start) / Math.max(1, end - start));
 const mix = (from: number, to: number, t: number) => from + (to - from) * t;
+// Hidden scenes skip painting entirely, so their looping details cost nothing while off screen.
+const showWhen = (visible: boolean) => (visible ? "visible" : "hidden");
+
+// Soft blue glow behind each scene. A plain gradient is far cheaper than a drop-shadow filter on moving art.
+const glowDisc = (
+  <div
+    aria-hidden
+    className="absolute inset-[-12%] rounded-full bg-[radial-gradient(closest-side,rgba(41,151,255,0.28),transparent)]"
+  />
+);
 
 // The astronaut acts out a story as you scroll:
 // 1. Hero: sits on a ringed planet typing on a laptop.
@@ -61,6 +72,8 @@ const mix = (from: number, to: number, t: number) => from + (to - from) * t;
 // 6. Contact: the helmet peeks up from the bottom edge and a hand waves goodbye.
 export default function AstronautJourney() {
   const reduceMotion = useReducedMotion();
+  // Lite mode keeps the scroll story but drops the small looping details (twinkles, steam, streaks, bobbing).
+  const lite = useLiteMode();
   const { scrollY } = useScroll();
   const marks = useRef<Marks>(initialMarks);
 
@@ -154,33 +167,53 @@ export default function AstronautJourney() {
   const staticHeroOpacity = useTransform(scrollY, (y) => (y < marks.current.heroEnd ? 1 : 0));
   const staticPeekerOpacity = useTransform(wave, (w) => (w > 0.5 ? 1 : 0));
 
+  // When each scene is on screen; everything else is hidden so it isn't painted.
+  const heroVisibility = useTransform(scrollY, (y) => showWhen(y < marks.current.aboutEnd + marks.current.viewport * 0.1));
+  const planetVisibility = useTransform(planetOpacity, (o) => showWhen(o > 0));
+  const rocketVisibility = useTransform(rocketOpacity, (o) => showWhen(o > 0));
+  const meditatorVisibility = useTransform(meditate, (v) => showWhen(v > 0));
+  const peekerVisibility = useTransform(wave, (w) => showWhen(w > 0));
+  const staticHeroVisibility = useTransform(staticHeroOpacity, (o) => showWhen(o > 0));
+  const staticPeekerVisibility = useTransform(staticPeekerOpacity, (o) => showWhen(o > 0));
+
   const layer = "absolute inset-0 h-full w-full";
-  const glow = "drop-shadow-[0_0_28px_rgba(41,151,255,0.35)]";
   const bob = { animate: { y: [0, -8, 0] }, transition: { duration: 2, repeat: Infinity, ease: "easeInOut" as const } };
 
   // The astronaut sits just inside the planet's crest.
-  const heroScene = `pointer-events-none fixed left-1/2 -z-[5] aspect-[240/200] w-[min(46vw,250px)] -translate-x-1/2 ${glow}`;
-  const planetScene = `pointer-events-none fixed left-1/2 -z-[5] aspect-[400/260] w-[min(92vw,600px)] -translate-x-1/2 ${glow}`;
+  const heroScene = "pointer-events-none fixed left-1/2 -z-[5] aspect-[240/200] w-[min(46vw,250px)] -translate-x-1/2";
+  const planetScene = "pointer-events-none fixed left-1/2 -z-[5] aspect-[400/260] w-[min(92vw,600px)] -translate-x-1/2";
   // Left side, below the project list; laptops only, since phones stack the cards across the full width.
-  const meditatorScene = `pointer-events-none fixed bottom-[6vh] left-[3vw] -z-[5] hidden aspect-square w-[min(28vw,240px)] md:block ${glow}`;
+  const meditatorScene = "pointer-events-none fixed bottom-[6vh] left-[3vw] -z-[5] hidden aspect-square w-[min(28vw,240px)] md:block";
   // Deliberately huge: the final peek should feel big and playful.
-  const peekerScene = `pointer-events-none fixed right-[3vw] bottom-0 -z-[5] aspect-[240/200] w-[min(78vw,500px)] ${glow}`;
+  const peekerScene = "pointer-events-none fixed right-[3vw] bottom-0 -z-[5] aspect-[240/200] w-[min(78vw,500px)]";
 
   if (reduceMotion) {
     return (
       <>
-        <motion.div style={{ opacity: staticHeroOpacity, bottom: planetBottom }} className={planetScene}>
+        <motion.div
+          style={{ opacity: staticHeroOpacity, visibility: staticHeroVisibility, bottom: planetBottom }}
+          className={planetScene}
+        >
+          {glowDisc}
           <Planet className={layer} />
         </motion.div>
-        <motion.div style={{ opacity: staticHeroOpacity, bottom: astronautBottom }} className={heroScene}>
-          <Sparkles className={layer} />
+        <motion.div
+          style={{ opacity: staticHeroOpacity, visibility: staticHeroVisibility, bottom: astronautBottom }}
+          className={heroScene}
+        >
+          {glowDisc}
           <Coder className={layer} />
           <Laptop className={layer} />
         </motion.div>
-        <motion.div style={{ opacity: meditate }} className={meditatorScene}>
-          <Meditator className={layer} />
+        <motion.div style={{ opacity: meditate, visibility: meditatorVisibility }} className={meditatorScene}>
+          {glowDisc}
+          <Meditator className={layer} steam={false} />
         </motion.div>
-        <motion.div style={{ opacity: staticPeekerOpacity, y: `${peekY}%` }} className={peekerScene}>
+        <motion.div
+          style={{ opacity: staticPeekerOpacity, visibility: staticPeekerVisibility, y: `${peekY}%` }}
+          className={peekerScene}
+        >
+          {glowDisc}
           <Peeker className={layer} />
         </motion.div>
       </>
@@ -188,15 +221,24 @@ export default function AstronautJourney() {
   }
 
   return (
-    <>
-      <motion.div style={{ bottom: planetBottom, y: planetY, opacity: planetOpacity }} className={planetScene}>
+    // In lite mode, "always" turns off the looping body animations (typing, waving, bobbing, tumbling),
+    // while the scroll-driven story keeps working.
+    <MotionConfig reducedMotion={lite ? "always" : "user"}>
+      <motion.div
+        style={{ bottom: planetBottom, y: planetY, opacity: planetOpacity, visibility: planetVisibility }}
+        className={planetScene}
+      >
+        {glowDisc}
         <Planet className={layer} />
       </motion.div>
 
-      <div style={{ bottom: astronautBottom }} className={heroScene}>
-        <motion.div style={{ opacity: sparklesOpacity }} className={layer}>
-          <Sparkles className={layer} />
-        </motion.div>
+      <motion.div style={{ bottom: astronautBottom, visibility: heroVisibility }} className={heroScene}>
+        {glowDisc}
+        {!lite && (
+          <motion.div style={{ opacity: sparklesOpacity }} className={layer}>
+            <Sparkles className={layer} />
+          </motion.div>
+        )}
 
         <motion.div
           style={{ x: astronautX, y: astronautY, scale: astronautScale, rotate: astronautRotate, opacity: astronautOpacity }}
@@ -219,31 +261,44 @@ export default function AstronautJourney() {
         <motion.div style={{ y: laptopY, rotate: laptopRotate, opacity: laptopOpacity }} className={layer}>
           <Laptop className={layer} />
         </motion.div>
-      </div>
+      </motion.div>
 
       <motion.div
-        style={{ x: rocketX, y: rocketY, scale: rocketScale, rotate: rocketRotate, opacity: rocketOpacity }}
-        className={`pointer-events-none fixed top-[38vh] left-0 -z-[5] aspect-[280/220] w-[min(45vw,300px)] ${glow}`}
+        style={{
+          x: rocketX,
+          y: rocketY,
+          scale: rocketScale,
+          rotate: rocketRotate,
+          opacity: rocketOpacity,
+          visibility: rocketVisibility,
+        }}
+        className="pointer-events-none fixed top-[38vh] left-0 -z-[5] aspect-[280/220] w-[min(45vw,300px)]"
       >
+        {glowDisc}
         <motion.div {...bob} className={layer}>
           <RocketRider className={layer} />
         </motion.div>
       </motion.div>
 
-      <motion.div style={{ y: meditatorY, opacity: meditate }} className={meditatorScene}>
-        <Aura className={layer} />
+      <motion.div
+        style={{ y: meditatorY, opacity: meditate, visibility: meditatorVisibility }}
+        className={meditatorScene}
+      >
+        {glowDisc}
+        {!lite && <Aura className={layer} />}
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
           className={layer}
         >
-          <Meditator className={layer} />
+          <Meditator className={layer} steam={!lite} />
         </motion.div>
       </motion.div>
 
-      <motion.div style={{ y: peekerY }} className={peekerScene}>
+      <motion.div style={{ y: peekerY, visibility: peekerVisibility }} className={peekerScene}>
+        {glowDisc}
         <Peeker className={layer} />
       </motion.div>
-    </>
+    </MotionConfig>
   );
 }

@@ -28,10 +28,10 @@ export default function Hero({ name, title, location }: HeroProps) {
     <section id="top" ref={ref} className={reduceMotion ? "relative h-screen" : "relative h-[200vh]"}>
       {/* Bottom padding leaves room for the astronaut at its laptop (AstronautJourney) under the name */}
       <div className="sticky top-0 flex h-screen flex-col items-center justify-center overflow-hidden px-4 pb-[min(46vh,400px)] md:pb-0">
-        {/* Placeholder graphic: soft glowing shapes behind the name */}
+        {/* Soft glowing shapes behind the name. Radial gradients look like big blurs but cost almost nothing to draw. */}
         <div aria-hidden className="pointer-events-none absolute inset-0">
-          <div className="absolute left-1/2 top-1/2 h-[60vmin] w-[60vmin] -translate-x-[70%] -translate-y-1/2 rounded-full bg-accent/25 blur-[120px]" />
-          <div className="absolute left-1/2 top-1/2 h-[45vmin] w-[45vmin] -translate-x-[10%] -translate-y-[30%] rounded-full bg-fuchsia-500/15 blur-[120px]" />
+          <div className="absolute left-1/2 top-1/2 h-[110vmin] w-[110vmin] -translate-x-[60%] -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(41,151,255,0.22),transparent)]" />
+          <div className="absolute left-1/2 top-1/2 h-[90vmin] w-[90vmin] -translate-x-[25%] -translate-y-[40%] rounded-full bg-[radial-gradient(closest-side,rgba(217,70,239,0.13),transparent)]" />
         </div>
 
         {/* Name and title move up together; the name shrinks toward its bottom edge so the gap below it stays small */}

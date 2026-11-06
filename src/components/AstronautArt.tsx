@@ -26,7 +26,7 @@ const limbMotion = {
   sway: { animate: { rotate: [-12, 12, -12] }, duration: 4 },
 };
 
-// Shared gradient and the white sticker border. Every SVG includes these so each layer works on its own.
+// Shared visor gradient. Every SVG includes it so each layer works on its own.
 function Defs() {
   return (
     <defs>
@@ -35,20 +35,6 @@ function Defs() {
         <stop offset="55%" stopColor="#111a3d" />
         <stop offset="100%" stopColor="#05070f" />
       </radialGradient>
-      {[
-        { id: "astro-sticker", radius: 5 },
-        { id: "astro-sticker-thin", radius: 1.4 },
-      ].map(({ id, radius }) => (
-        <filter key={id} id={id} x="-20%" y="-20%" width="140%" height="140%">
-          <feMorphology in="SourceAlpha" operator="dilate" radius={radius} result="thick" />
-          <feFlood floodColor="white" />
-          <feComposite in2="thick" operator="in" result="border" />
-          <feMerge>
-            <feMergeNode in="border" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      ))}
     </defs>
   );
 }
@@ -75,7 +61,9 @@ function Sticker({
     <svg viewBox={viewBox} className={className} overflow="visible" aria-hidden>
       <Defs />
       {underlay}
-      <g filter={thin ? "url(#astro-sticker-thin)" : "url(#astro-sticker)"}>{children}</g>
+      {/* White sticker border: a copy of the art turned into a thick white silhouette (see .astro-halo in globals.css) */}
+      <g className={thin ? "astro-halo astro-halo-thin" : "astro-halo"}>{children}</g>
+      <g>{children}</g>
       {overlay}
     </svg>
   );
@@ -527,11 +515,12 @@ function Steam({ x, y }: { x: number; y: number }) {
   );
 }
 
-export function Meditator({ className }: { className?: string }) {
+// `steam` can be turned off in lite mode to save work on lower-powered devices.
+export function Meditator({ className, steam = true }: { className?: string; steam?: boolean }) {
   const cx = 120;
   const top = 103;
   return (
-    <Sticker viewBox={meditatorViewBox} className={className} overlay={<Steam {...mug} />}>
+    <Sticker viewBox={meditatorViewBox} className={className} overlay={steam ? <Steam {...mug} /> : null}>
       <Torso cx={cx} top={top} />
       {/* Legs crossed in front of the body */}
       <Leg x={cx - hip.dx} y={top + hip.dy} angle={-78} length={30} />
